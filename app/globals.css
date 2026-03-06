@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #f9fafb;
+    color: #111827;
+  }
+}
+
+@layer components {
+  .container-custom {
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .container-custom {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .container-custom {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+  
+  .btn-primary {
+    background-color: #2563eb;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .btn-primary:hover {
+    background-color: #1d4ed8;
+  }
+  
+  /* ফুটারের জন্য স্টাইল */
+  .footer-link {
+    color: #4b5563;
+    transition-property: color;
+    transition-duration: 200ms;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  
+  .footer-link:hover {
+    color: #2563eb;
+  }
+  
+  .footer-title {
+    font-weight: 600;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    margin-bottom: 1rem;
+    color: #1f2937;
+  }
+  
+  .social-icon {
+    background-color: #f3f4f6;
+    padding: 0.5rem;
+    border-radius: 9999px;
+    transition-property: all;
+    transition-duration: 200ms;
+  }
+  
+  .social-icon:hover {
+    background-color: #2563eb;
+    color: white;
+  }
+}
