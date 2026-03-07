@@ -1,20 +1,38 @@
 'use client'
 
+import { useLanguage } from "@/app/context/LanguageContext"
 
-import { useLanguage } from '@/app/context/LanguageContext'
-import { Globe, ChevronDown } from 'lucide-react'
+
 
 export default function LanguageToggle() {
-  const { language, toggleLanguage, t } = useLanguage()
+  const { language, setLanguage, t } = useLanguage()
+
+  const handleChangeLanguage = (lang: 'en' | 'bn') => {
+    setLanguage(lang)
+  }
 
   return (
-    <button 
-      onClick={toggleLanguage}
-      className="flex items-center space-x-1 text-gray-700 hover:text-primary transition"
-    >
-      <Globe size={20} />
-      <span className="font-medium">{t('nav.lang')}</span>
-      <ChevronDown size={16} />
-    </button>
+    <div className="flex bg-gray-100 p-1 rounded-lg text-[11px] font-black border border-gray-200">
+      <button 
+        onClick={() => handleChangeLanguage('en')} 
+        className={`px-3 py-1 rounded-md transition-all ${
+          language === 'en' 
+            ? 'bg-white shadow-sm text-primary' 
+            : 'text-gray-400 hover:text-gray-600'
+        }`}
+      >
+        EN
+      </button>
+      <button 
+        onClick={() => handleChangeLanguage('bn')} 
+        className={`px-3 py-1 rounded-md transition-all ${
+          language === 'bn' 
+            ? 'bg-white shadow-sm text-primary' 
+            : 'text-gray-400 hover:text-gray-600'
+        }`}
+      >
+        বাং
+      </button>
+    </div>
   )
 }

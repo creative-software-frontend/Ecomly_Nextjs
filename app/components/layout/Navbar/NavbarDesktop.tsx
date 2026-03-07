@@ -5,6 +5,7 @@ import { ShoppingCart, User } from 'lucide-react'
 import LanguageToggle from './LanguageToggle'
 import SearchBar from './SearchBar'
 import { useLanguage } from '@/app/context/LanguageContext'
+import Logo from '../../shared/Logo'
 
 export default function NavbarDesktop() {
   const { t } = useLanguage()
@@ -13,10 +14,7 @@ export default function NavbarDesktop() {
     <>
       {/* মেইন ন্যাভবার */}
       <div className="flex items-center justify-between py-3">
-        <Link href="/" className="flex items-center space-x-2">
-          <span className="text-2xl font-bold text-primary">Ecomly</span>
-          <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full">.com</span>
-        </Link>
+        <Logo showText={false}/>
 
         <div className="flex-1 max-w-2xl mx-8">
           <SearchBar />
