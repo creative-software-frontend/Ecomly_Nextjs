@@ -12,7 +12,7 @@ export default function FooterBottom() {
         {/* সাপোর্ট সেকশন */}
         <div>
           <h3 className="font-semibold text-lg mb-3">{t('footer.support')}</h3>
-          <p className="text-2xl font-bold text-primary mb-4">+880678045555</p>
+          <p className="text-2xl font-bold text-primary mb-4">+8806780400000</p>
           <div>
             <h4 className="font-medium mb-2">{t('footer.download')}</h4>
             <div className="flex space-x-3">
