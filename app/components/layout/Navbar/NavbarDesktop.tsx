@@ -9,9 +9,13 @@ export default function NavbarDesktop() {
   const { t } = useLanguage()
 
   const handleCategoriesClick = () => {
-    // চেক করুন ব্রাউজারে window আছে কিনা
+    // সরাসরি ইভেন্ট ডিসপ্যাচ
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('toggleCategorySidebar'))
+      const event = new Event('toggleCategorySidebar')
+      window.dispatchEvent(event)
+      
+      // ডিবাগ জন্য কনসোল
+      console.log('Toggle event dispatched')
     }
   }
 
@@ -19,7 +23,7 @@ export default function NavbarDesktop() {
     <>
       {/* মেইন ন্যাভবার */}
       <div className="flex items-center justify-between py-3">
-        <Logo showText={false} textClassName="text-primary-800" />
+        <Logo showText={true} textClassName="text-primary-800" />
         
         <div className="flex-1 max-w-2xl mx-8">
           <SearchBar />

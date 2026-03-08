@@ -12,7 +12,7 @@ export default function CategoriesLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const pathname = usePathname()
 
-  // URL চেঞ্জ হলে সাইডবার ক্লোজ করুন (মোবাইলের জন্য)
+  // ইউআরএল চেঞ্জ হলে সাইডবার ক্লোজ করুন (মোবাইলের জন্য)
   useEffect(() => {
     if (window.innerWidth < 1024) {
       setIsSidebarOpen(false)
@@ -21,16 +21,17 @@ export default function CategoriesLayout({
 
   // কাস্টম ইভেন্ট লিসেনার
   useEffect(() => {
-    const handleToggleSidebar = () => {
+    // গ্লোবাল ফাংশন তৈরি করুন
+    const toggleSidebar = () => {
       setIsSidebarOpen(prev => !prev)
     }
 
-    // ইভেন্ট লিসেনার যোগ করুন
-    window.addEventListener('toggleCategorySidebar', handleToggleSidebar)
+    // ইভেন্ট লিসেনার
+    window.addEventListener('toggleCategorySidebar', toggleSidebar)
     
     // ক্লিনআপ
     return () => {
-      window.removeEventListener('toggleCategorySidebar', handleToggleSidebar)
+      window.removeEventListener('toggleCategorySidebar', toggleSidebar)
     }
   }, [])
 

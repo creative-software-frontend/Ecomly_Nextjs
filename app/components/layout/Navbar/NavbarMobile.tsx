@@ -13,7 +13,10 @@ export default function NavbarMobile() {
 
   const handleCategoriesClick = () => {
     setIsMenuOpen(false)
-    window.dispatchEvent(new Event('toggleCategorySidebar'))
+    if (typeof window !== 'undefined') {
+      const event = new Event('toggleCategorySidebar')
+      window.dispatchEvent(event)
+    }
   }
 
   return (
@@ -24,7 +27,6 @@ export default function NavbarMobile() {
         </Link>
 
         <div className="flex items-center space-x-4">
-          {/* ল্যাঙ্গুয়েজ টগল মোবাইলে টপবারে */}
           <LanguageToggle />
           
           <Link href="/cart" className="relative">
@@ -63,7 +65,6 @@ export default function NavbarMobile() {
             
             <div className="border-t border-gray-100 my-2"></div>
             
-            {/* লগিন/রেজিস্টার */}
             <div className="flex items-center gap-3 py-2">
               <Link 
                 href="/login" 
