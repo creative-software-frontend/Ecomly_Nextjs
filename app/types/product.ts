@@ -1,8 +1,3 @@
-// types/product.ts
-
-/**
- * Main Product interface used throughout the application
- */
 export interface Product {
   id: string
   name: string
@@ -22,9 +17,6 @@ export interface Product {
   totalOrders?: number
 }
 
-/**
- * Products from a single site/source
- */
 export interface SiteProducts {
   id: string
   site: string
@@ -33,22 +25,6 @@ export interface SiteProducts {
   error?: string
 }
 
-/**
- * Prothomashop API response format
- */
-export interface ProthomashopApiResponse {
-  success: boolean
-  message?: string
-  code?: number
-  result?: {
-    category?: string
-    products: ProthomashopProduct[]
-  }
-}
-
-/**
- * Raw Prothomashop product data from API
- */
 export interface ProthomashopProduct {
   id: number
   title: string
@@ -64,47 +40,26 @@ export interface ProthomashopProduct {
   category?: string
 }
 
-/**
- * Generic API response for any e-commerce platform
- */
+// ===== GenericApiResponse =====
 export interface GenericApiResponse {
   success?: boolean
-  data?: {
-    products?: Array<{
-      id: string | number
-      name?: string
-      title?: string
-      price: number
-      sale_price?: number
-      image?: string
-      thumbnail?: string
-      rating?: number
-      reviews?: number
-    }>
-  }
-  products?: Array<{
-    id: string | number
-    name?: string
-    title?: string
-    price: number
-    sale_price?: number
-    image?: string
-    thumbnail?: string
-    rating?: number
-    reviews?: number
-  }>
   result?: {
-    products?: Array<{
-      id: string | number
-      name?: string
-      title?: string
-      price: number
-      sale_price?: number
-      image?: string
-      thumbnail?: string
-      rating?: number
-      reviews?: number
-      total_orders?: number
-    }>
+    products?: ProthomashopProduct[]
   }
+  products?: any[]
+  // Paginated API format
+  current_page?: number
+  data?: any[]
+  first_page_url?: string
+  from?: number
+  last_page?: number
+  last_page_url?: string
+  links?: any[]
+  next_page_url?: string | null
+  path?: string
+  per_page?: number
+  prev_page_url?: string | null
+  to?: number
+  total?: number
+  [key: string]: any
 }

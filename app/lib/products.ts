@@ -9,7 +9,7 @@ interface SiteConfig {
   id: string
   name: string
   apiUrl: string
-  imageUrl?: string // Base URL for images
+  imageUrl?: string
   categoryApi?: (catId: number) => string
 }
 
@@ -20,38 +20,26 @@ const SITES: SiteConfig[] = [
     apiUrl: 'https://admin.prothomashop.com/api/products',
     imageUrl: 'https://admin.prothomashop.com/public/uploads/products/',
     categoryApi: (catId: number) => `https://admin.prothomashop.com/api/category/${catId}/products`
-  },
-  // Space for adding more sites later
-  // Example:
-  // {
-  //   id: 'daraz',
-  //   name: 'Daraz',
-  //   apiUrl: 'https://api.daraz.com.bd/products',
-  //   imageUrl: 'https://cdn.daraz.com.bd/'
-  // }
+  }
 ]
 
 // ============================================
-// STEP 2: Safe JSON Parser (Handle "Not found" and invalid responses)
+// STEP 2: Safe JSON Parser
 // ============================================
 
 async function safeJsonParse(response: Response): Promise<any> {
   try {
     const text = await response.text()
-    
-    // Log first 100 chars of response for debugging
     console.log('Response text (first 100 chars):', text.substring(0, 100))
     
-    // Check if response is "Not found" or other error strings
     if (!text || text.includes('Not found') || text.includes('not found')) {
-      console.warn('❌ API returned "Not found" or empty response')
+      console.warn('API returned "Not found" or empty response')
       return null
     }
     
-    // Try to parse as JSON
     return JSON.parse(text)
   } catch (error) {
-    console.error('❌ JSON parse error:', error instanceof Error ? error.message : error)
+    console.error('JSON parse error:', error instanceof Error ? error.message : error)
     return null
   }
 }
@@ -61,7 +49,6 @@ async function safeJsonParse(response: Response): Promise<any> {
 // ============================================
 
 function formatProthomashopProduct(product: ProthomashopProduct, baseUrl?: string): Product {
-  // Remove HTML tags from description
   const cleanDescription = product.short_description 
     ? product.short_description.replace(/<[^>]*>/g, '').trim()
     : ''
@@ -92,38 +79,29 @@ function formatProthomashopProduct(product: ProthomashopProduct, baseUrl?: strin
 
 async function fetchSingleSite(site: SiteConfig): Promise<SiteProducts> {
   try {
-    console.log(`\n🔄 Fetching data from ${site.name}...`)
-    console.log(`📡 API URL: ${site.apiUrl}`)
+    console.log(`\nFetching data from ${site.name}...`)
+    console.log(`API URL: ${site.apiUrl}`)
     
     const response = await fetch(site.apiUrl, {
       next: { revalidate: 3600 }
     })
     
-    // Log response details
-    console.log(`📊 Response Status: ${response.status} ${response.statusText}`)
-    console.log(`📋 Response Headers:`)
-    console.log(`   Content-Type: ${response.headers.get('content-type')}`)
-    console.log(`   Content-Length: ${response.headers.get('content-length')}`)
+    console.log(`Response Status: ${response.status}`)
+    console.log(`Content-Type: ${response.headers.get('content-type')}`)
     
     if (!response.ok) {
-      console.warn(`❌ ${site.name} - HTTP error! Status: ${response.status}`)
-      
-      // Try to get error message from response
+      console.warn(`${site.name} - HTTP error! Status: ${response.status}`)
       const errorText = await response.text()
-      console.warn(`Error response body:`, errorText.substring(0, 200))
-      
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      console.warn(`Error response:`, errorText.substring(0, 200))
+      throw new Error(`HTTP ${response.status}`)
     }
     
-    // Use safe JSON parser
     const data: GenericApiResponse = await safeJsonParse(response)
     
     if (!data) {
-      console.warn(`❌ ${site.name}: No valid data received - switching to fallback`)
-      
-      // IMMEDIATELY return fallback products
+      console.warn(`${site.name}: No valid data received - switching to fallback`)
       const fallbackProducts = getFallbackProducts()
-      console.log(`✅ ${site.name}: Loaded ${fallbackProducts.length} fallback products`)
+      console.log(`${site.name}: Loaded ${fallbackProducts.length} fallback products`)
       
       return {
         id: site.id,
@@ -136,21 +114,41 @@ async function fetchSingleSite(site: SiteConfig): Promise<SiteProducts> {
     
     let products: Product[] = []
     
+    // ===== নতুন CASE যোগ করা হলো =====
+    // CASE: Paginated API format (current_page, data array)
+    if (data.current_page && Array.isArray(data.data)) {
+      console.log(`${site.name}: Detected paginated format with ${data.data.length} products`)
+      products = data.data.map((item: any) => ({
+        id: item.id.toString(),
+        name: item.title || item.name || 'Unknown',
+        price: item.sale_price || item.price || 0,
+        oldPrice: item.price && item.sale_price && item.price > item.sale_price ? item.price : undefined,
+        image: site.imageUrl ? `${site.imageUrl}${item.image}` : `https://admin.prothomashop.com/public/uploads/products/${item.image}`,
+        rating: {
+          stars: 4.5,
+          count: item.total_orders || 0
+        },
+        category: item.category_name || 'Book',
+        description: item.short_description?.replace(/<[^>]*>/g, '') || '',
+        sku: item.sku,
+        shipping_cost: item.shipping_cost
+      }))
+    }
     // CASE 1: Prothomashop data format
-    if (site.id === 'prothomashop' && data.success && data.result?.products) {
-      console.log(`✅ ${site.name}: Detected Prothomashop format with ${data.result.products.length} products`)
+    else if (site.id === 'prothomashop' && data.success && data.result?.products) {
+      console.log(`${site.name}: Detected Prothomashop format with ${data.result.products.length} products`)
       products = data.result.products.map((product: any) => 
         formatProthomashopProduct(product as ProthomashopProduct, site.imageUrl)
       )
     } 
     // CASE 2: Direct array format
     else if (Array.isArray(data)) {
-      console.log(`✅ ${site.name}: Detected direct array format with ${data.length} products`)
+      console.log(`${site.name}: Detected direct array format with ${data.length} products`)
       products = data as Product[]
     } 
     // CASE 3: Data inside 'products' property
     else if (data.products) {
-      console.log(`✅ ${site.name}: Detected products property format`)
+      console.log(`${site.name}: Detected products property format`)
       products = data.products.map((p: any) => ({
         id: p.id.toString(),
         name: p.name || p.title || 'Unknown Product',
@@ -165,7 +163,7 @@ async function fetchSingleSite(site: SiteConfig): Promise<SiteProducts> {
     } 
     // CASE 4: Data inside 'result.products'
     else if (data.result?.products) {
-      console.log(`✅ ${site.name}: Detected result.products format with ${data.result.products.length} products`)
+      console.log(`${site.name}: Detected result.products format with ${data.result.products.length} products`)
       products = data.result.products.map((p: any) => ({
         id: p.id.toString(),
         name: p.name || p.title || 'Unknown Product',
@@ -179,16 +177,15 @@ async function fetchSingleSite(site: SiteConfig): Promise<SiteProducts> {
       }))
     }
     else {
-      console.warn(`⚠️ ${site.name}: Unknown data format`, Object.keys(data))
+      console.warn(`${site.name}: Unknown data format`, Object.keys(data))
     }
     
-    console.log(`📦 ${site.name}: Processed ${products.length} products`)
+    console.log(`${site.name}: Processed ${products.length} products`)
     
-    // If no products from API, use fallback
     if (products.length === 0) {
-      console.warn(`⚠️ ${site.name}: API returned 0 products - using fallback`)
+      console.warn(`${site.name}: API returned 0 products - using fallback`)
       const fallbackProducts = getFallbackProducts()
-      console.log(`✅ ${site.name}: Loaded ${fallbackProducts.length} fallback products`)
+      console.log(`${site.name}: Loaded ${fallbackProducts.length} fallback products`)
       
       return {
         id: site.id,
@@ -199,7 +196,7 @@ async function fetchSingleSite(site: SiteConfig): Promise<SiteProducts> {
       }
     }
     
-    console.log(`✅ ${site.name}: Successfully loaded ${products.length} products`)
+    console.log(`${site.name}: Successfully loaded ${products.length} products`)
     
     return {
       id: site.id,
@@ -210,18 +207,17 @@ async function fetchSingleSite(site: SiteConfig): Promise<SiteProducts> {
     
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    console.error(`❌ ${site.name} data fetch failed:`, errorMessage)
-    console.log(`⚠️ ${site.name}: Switching to fallback products`)
+    console.error(`${site.name} data fetch failed:`, errorMessage)
+    console.log(`${site.name}: Switching to fallback products`)
     
-    // Return fallback products instead of empty array
     const fallbackProducts = getFallbackProducts()
-    console.log(`✅ ${site.name}: Loaded ${fallbackProducts.length} fallback products`)
+    console.log(`${site.name}: Loaded ${fallbackProducts.length} fallback products`)
     
     return {
       id: site.id,
       site: site.name,
       products: fallbackProducts,
-      success: true, // Mark as success since we have fallback data
+      success: true,
       error: `Fetch failed: ${errorMessage}`
     }
   }
@@ -233,8 +229,8 @@ async function fetchSingleSite(site: SiteConfig): Promise<SiteProducts> {
 
 export async function getAllSitesProducts(): Promise<SiteProducts[]> {
   try {
-    console.log('🔄 Starting data fetch from all sites...')
-    console.log(`📊 Total sites configured: ${SITES.length}`)
+    console.log('Starting data fetch from all sites...')
+    console.log(`Total sites configured: ${SITES.length}`)
     
     const promises = SITES.map(site => fetchSingleSite(site))
     const results = await Promise.all(promises)
@@ -242,7 +238,6 @@ export async function getAllSitesProducts(): Promise<SiteProducts[]> {
     const successfulSites = results.filter((r: SiteProducts) => r.success).length
     const totalProducts = results.reduce((sum: number, r: SiteProducts) => sum + r.products.length, 0)
     
-    // Check if we're using fallback data
     const usingFallback = results.some(r => r.error !== undefined)
     const fallbackCount = results.filter(r => r.error !== undefined).length
     
@@ -251,14 +246,14 @@ export async function getAllSitesProducts(): Promise<SiteProducts[]> {
     console.log(`Total products: ${totalProducts}`)
     
     if (usingFallback) {
-      console.log(`⚠️ ${fallbackCount} site(s) using fallback data`)
+      console.log(`${fallbackCount} site(s) using fallback data`)
       results.forEach(r => {
         if (r.error) {
           console.log(`  - ${r.site}: ${r.error}`)
         }
       })
     } else {
-      console.log('✅ All sites loaded successfully with real API data')
+      console.log('All sites loaded successfully with real API data')
     }
     
     console.log(`=========================\n`)
@@ -267,9 +262,8 @@ export async function getAllSitesProducts(): Promise<SiteProducts[]> {
     
   } catch (error) {
     console.error('Major error! Returning fallback products for all sites', error)
-    // Return fallback products for all sites
     const fallbackProducts = getFallbackProducts()
-    console.log(`✅ Emergency fallback: Loaded ${fallbackProducts.length} products`)
+    console.log(`Emergency fallback: Loaded ${fallbackProducts.length} products`)
     
     return SITES.map(site => ({
       id: site.id,
@@ -287,42 +281,38 @@ export async function getAllSitesProducts(): Promise<SiteProducts[]> {
 
 export async function getCategoryProducts(categoryId: number): Promise<Product[]> {
   try {
-    const site = SITES.find(s => s.id === 'prothomashop')
-    if (!site || !site.categoryApi) {
-      console.warn('No category API found for prothomashop')
-      return []
-    }
+    console.log(`Fetching category ${categoryId} products...`)
     
-    const url = site.categoryApi(categoryId)
-    console.log('Fetching category products from:', url)
+    const url = `https://admin.prothomashop.com/api/category/${categoryId}/products`
+    console.log('URL:', url)
     
     const response = await fetch(url, {
-      next: { revalidate: 3600 }
+      next: { revalidate: 60 }
     })
     
+    console.log('Response status:', response.status)
+    
     if (!response.ok) {
-      console.error('Category API response not OK:', response.status)
+      console.warn('Category API response not OK')
       return []
     }
     
-    // Use safe JSON parser
-    const data: GenericApiResponse = await safeJsonParse(response)
-    
-    if (!data) {
-      console.warn('Category API returned no valid data')
-      return []
-    }
+    const data = await response.json()
     
     if (data.success && data.result?.products) {
-      const products = data.result.products.map((product: any) => 
-        formatProthomashopProduct(product as ProthomashopProduct, site.imageUrl)
-      )
-      
-      console.log(`Category ${categoryId}: ${products.length} products loaded`)
-      return products
+      console.log(`Found ${data.result.products.length} products`)
+      return data.result.products.map((p: any) => ({
+        id: p.id.toString(),
+        name: p.title,
+        price: p.sale_price || p.price,
+        oldPrice: p.price > p.sale_price ? p.price : undefined,
+        image: `https://admin.prothomashop.com/public/uploads/products/${p.image}`,
+        rating: { stars: 4.5, count: p.total_orders || 0 },
+        category: 'Book',
+        description: p.short_description?.replace(/<[^>]*>/g, '') || ''
+      }))
     }
     
-    console.warn('Unexpected category API response format:', data)
     return []
     
   } catch (error) {
