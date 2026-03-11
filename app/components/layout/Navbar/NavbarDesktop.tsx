@@ -27,7 +27,7 @@ export default function NavbarDesktop() {
          <LanguageToggle />
          <AuthButton />
          <Link href="/cart" className="relative">
-           <ShoppingCart size={24} className="text-gray-700 hover:text-primary transition" />
+           <ShoppingCart size={24} className="text-gray-700 hover:text-green-600 transition" />
            {totalItems > 0 && (
              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">
                {totalItems}
@@ -58,7 +58,7 @@ export default function NavbarDesktop() {
           <Link href="/help" className="text-sm text-gray-600 hover:text-green-600 font-medium transition-colors">
             {t('nav.help')}
           </Link>
-          <Link href="/sell" className="text-sm bg-secondary-600 text-white px-4 py-1.5 rounded-full hover:bg-secondary-700 transition font-medium">
+          <Link href="/sell" className="text-sm bg-green-600 text-white px-4 py-1.5 rounded-full hover:bg-green-700 transition font-medium">
             {t('nav.sell')}
           </Link>
         </div>

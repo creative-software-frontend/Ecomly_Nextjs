@@ -10,7 +10,7 @@ export default function TrackOrderPage() {
             <input 
               type="text" 
               placeholder="Enter your order ID"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-600"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-600"
             />
           </div>
           
@@ -19,11 +19,11 @@ export default function TrackOrderPage() {
             <input 
               type="tel" 
               placeholder="Enter your phone number"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-600"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-600"
             />
           </div>
           
-          <button className="w-full bg-primary-600 text-white py-3 rounded-lg font-medium hover:bg-primary-700 transition">
+          <button className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition">
             Track Order
           </button>
         </div>

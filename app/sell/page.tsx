@@ -25,8 +25,8 @@ export default function SellPage() {
             </ul>
             
             <Link 
-              href="/seller/register" 
-              className="mt-6 inline-block bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition"
+              href="/seller-register" 
+              className="mt-6 inline-block bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition"
             >
               Start Selling
             </Link>
