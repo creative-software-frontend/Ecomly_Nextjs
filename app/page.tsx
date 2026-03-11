@@ -11,10 +11,10 @@ export default async function Home() {
   const totalProducts = sitesData.reduce((sum, site) => sum + site.products.length, 0)
   console.log(` [HOMEPAGE] Loaded ${sitesData.length} sites with ${totalProducts} total products`)
   
-  // Check for fallback usage
-  const usingFallback = sitesData.some(site => site.error !== undefined)
-  if (usingFallback) {
-    console.warn(' [HOMEPAGE] Some sites using fallback data')
+  // Check for failed sites
+  const failedSites = sitesData.filter(site => !site.success).length
+  if (failedSites > 0) {
+    console.warn(' [HOMEPAGE] Some sites failed to load')
     sitesData.forEach(site => {
       if (site.error) {
         console.warn(`  - ${site.site}: ${site.error}`)
@@ -37,9 +37,9 @@ export default async function Home() {
           <p className="text-xl md:text-2xl opacity-90">
             Your one-stop shop for everything you need
           </p>
-          {usingFallback && (
+          {failedSites > 0 && (
             <div className="mt-4 bg-yellow-500 bg-opacity-30 px-4 py-2 rounded-lg inline-block">
-              <span className="text-sm">Using fallback data - API unavailable</span>
+              <span className="text-sm">Some sites failed to load - check console for details</span>
             </div>
           )}
         </div>

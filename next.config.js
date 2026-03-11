@@ -4,9 +4,15 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: '**.prothomashop.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'admin.prothomashop.com',
         port: '',
-        pathname: '/public/uploads/products/**',
+        pathname: '/**',
       },
       {
         protocol: 'https',
@@ -15,6 +21,10 @@ const nextConfig = {
         pathname: '/Free-Ecommerce-Products-Api/**',
       },
     ],
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    // Disable optimization to avoid private IP blocking
+    unoptimized: true,
   },
 }
 

@@ -1,5 +1,4 @@
 import { Product, SiteProducts, ProthomashopProduct, GenericApiResponse } from '@/app/types/product'
-import { getFallbackProducts } from './fallbackProducts'
 
 // ============================================
 // STEP 1: Define all sites/sources
@@ -53,9 +52,9 @@ function formatProthomashopProduct(product: ProthomashopProduct, baseUrl?: strin
     ? product.short_description.replace(/<[^>]*>/g, '').trim()
     : ''
   
-  // Ensure image URL is properly constructed
+  // Use environment variable for image base URL
   const imageUrl = product.image 
-    ? (baseUrl ? `${baseUrl}${product.image}` : `https://admin.prothomashop.com/public/uploads/products/${product.image}`)
+    ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://admin.prothomashop.com/product/'}${product.image}`
     : '/placeholder.jpg';
   
   console.log(`Product: ${product.title}, Image: ${product.image}, Full URL: ${imageUrl}`);
@@ -106,16 +105,14 @@ async function fetchSingleSite(site: SiteConfig): Promise<SiteProducts> {
     const data: GenericApiResponse = await safeJsonParse(response)
     
     if (!data) {
-      console.warn(`${site.name}: No valid data received - switching to fallback`)
-      const fallbackProducts = getFallbackProducts()
-      console.log(`${site.name}: Loaded ${fallbackProducts.length} fallback products`)
+      console.warn(`${site.name}: No valid data received`)
       
       return {
         id: site.id,
         site: site.name,
-        products: fallbackProducts,
-        success: true,
-        error: 'Using fallback data (API returned invalid response)'
+        products: [],
+        success: false,
+        error: 'API returned invalid response'
       }
     }
     
@@ -130,7 +127,7 @@ async function fetchSingleSite(site: SiteConfig): Promise<SiteProducts> {
         name: item.title || item.name || 'Unknown',
         price: item.sale_price || item.price || 0,
         oldPrice: item.price && item.sale_price && item.price > item.sale_price ? item.price : undefined,
-        image: item.image ? (site.imageUrl ? `${site.imageUrl}${item.image}` : `https://admin.prothomashop.com/public/uploads/products/${item.image}`) : '/placeholder.jpg',
+        image: item.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://admin.prothomashop.com/product/'}${item.image}` : '/placeholder.jpg',
         rating: {
           stars: 4.5,
           count: item.total_orders || 0
@@ -161,7 +158,7 @@ async function fetchSingleSite(site: SiteConfig): Promise<SiteProducts> {
         name: p.name || p.title || 'Unknown Product',
         price: p.sale_price || p.price,
         oldPrice: p.sale_price && p.sale_price < p.price ? p.price : undefined,
-      image: p.image ? `https://admin.prothomashop.com/public/uploads/products/${p.image}` : '/placeholder.jpg',
+      image: p.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://admin.prothomashop.com/product/'}${p.image}` : '/placeholder.jpg',
       rating: {
         stars: p.rating || 0,
         count: p.reviews || 0
@@ -176,7 +173,7 @@ async function fetchSingleSite(site: SiteConfig): Promise<SiteProducts> {
         name: p.name || p.title || 'Unknown Product',
         price: p.sale_price || p.price,
         oldPrice: p.sale_price && p.sale_price < p.price ? p.price : undefined,
-       image: p.image ? `https://admin.prothomashop.com/public/uploads/products/${p.image}` : '/placeholder.jpg',
+       image: p.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://admin.prothomashop.com/product/'}${p.image}` : '/placeholder.jpg',
        rating: {
          stars: p.rating || 0,
          count: p.reviews || p.total_orders || 0
@@ -190,16 +187,14 @@ async function fetchSingleSite(site: SiteConfig): Promise<SiteProducts> {
     console.log(`${site.name}: Processed ${products.length} products`)
     
     if (products.length === 0) {
-      console.warn(`${site.name}: API returned 0 products - using fallback`)
-      const fallbackProducts = getFallbackProducts()
-      console.log(`${site.name}: Loaded ${fallbackProducts.length} fallback products`)
+      console.warn(`${site.name}: API returned 0 products`)
       
       return {
         id: site.id,
         site: site.name,
-        products: fallbackProducts,
-        success: true,
-        error: 'Using fallback data (API returned empty products array)'
+        products: [],
+        success: false,
+        error: 'API returned empty products array'
       }
     }
     
@@ -215,16 +210,12 @@ async function fetchSingleSite(site: SiteConfig): Promise<SiteProducts> {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     console.error(`${site.name} data fetch failed:`, errorMessage)
-    console.log(`${site.name}: Switching to fallback products`)
-    
-    const fallbackProducts = getFallbackProducts()
-    console.log(`${site.name}: Loaded ${fallbackProducts.length} fallback products`)
     
     return {
       id: site.id,
       site: site.name,
-      products: fallbackProducts,
-      success: true,
+      products: [],
+      success: false,
       error: `Fetch failed: ${errorMessage}`
     }
   }
@@ -245,15 +236,14 @@ export async function getAllSitesProducts(): Promise<SiteProducts[]> {
     const successfulSites = results.filter((r: SiteProducts) => r.success).length
     const totalProducts = results.reduce((sum: number, r: SiteProducts) => sum + r.products.length, 0)
     
-    const usingFallback = results.some(r => r.error !== undefined)
-    const fallbackCount = results.filter(r => r.error !== undefined).length
+    const failedSites = results.filter(r => !r.success).length
     
     console.log(`\n=== Data Load Summary ===`)
     console.log(`${successfulSites}/${SITES.length} sites succeeded`)
     console.log(`Total products: ${totalProducts}`)
     
-    if (usingFallback) {
-      console.log(`${fallbackCount} site(s) using fallback data`)
+    if (failedSites > 0) {
+      console.log(`${failedSites} site(s) failed to load`)
       results.forEach(r => {
         if (r.error) {
           console.log(`  - ${r.site}: ${r.error}`)
@@ -268,17 +258,9 @@ export async function getAllSitesProducts(): Promise<SiteProducts[]> {
     return results
     
   } catch (error) {
-    console.error('Major error! Returning fallback products for all sites', error)
-    const fallbackProducts = getFallbackProducts()
-    console.log(`Emergency fallback: Loaded ${fallbackProducts.length} products`)
+    console.error('Major error! Failed to fetch products', error)
     
-    return SITES.map(site => ({
-      id: site.id,
-      site: site.name,
-      products: fallbackProducts,
-      success: true,
-      error: 'Using fallback data due to major error'
-    }))
+    return []
   }
 }
 
@@ -313,7 +295,7 @@ export async function getCategoryProducts(categoryId: number): Promise<Product[]
         name: p.title,
         price: p.sale_price || p.price,
         oldPrice: p.price > p.sale_price ? p.price : undefined,
-        image: `https://admin.prothomashop.com/public/uploads/products/${p.image}`,
+        image: `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://admin.prothomashop.com/product/'}${p.image}`,
         rating: { stars: 4.5, count: p.total_orders || 0 },
         category: 'Book',
         description: p.short_description?.replace(/<[^>]*>/g, '') || ''

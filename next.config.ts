@@ -8,6 +8,12 @@ const nextConfig = {
         port: '',
         pathname: '/Free-Ecommerce-Products-Api/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'admin.prothomashop.com',
+        port: '',
+        pathname: '/product/**',
+      },
     ],
   },
 }

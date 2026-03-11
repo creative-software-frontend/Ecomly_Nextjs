@@ -1,12 +1,12 @@
-import ProductCard from "../components/shared/ProductCard"
 import { getAllSitesProducts } from "../lib/products"
+import ProductGrid from "./ProductGrid"
 
 
 export default async function Home() {
   const sitesData = await getAllSitesProducts()
   const allProducts = sitesData.flatMap(site => site.products)
 
-  return (
+ return (
     <main className="min-h-screen bg-gray-50">
       {/* হিরো সেকশন */}
       <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
@@ -22,20 +22,9 @@ export default async function Home() {
       {/* প্রোডাক্ট সেকশন - শুধু প্রোডাক্ট, কোন ট্যাব নেই */}
       <section className="container-custom py-12">
         <h2 className="text-2xl font-bold mb-8">জনপ্রিয় পণ্য</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {allProducts.slice(0, 8).map((product: any) => (
-            <ProductCard
-              key={product.id}
-              id={product.id}
-              name={product.name}
-              price={product.priceCents / 100}
-              oldPrice={product.priceCents / 100 * 1.2}
-              image={product.image}
-              rating={product.rating.stars}
-              reviewCount={product.rating.count}
-            />
-          ))}
-        </div>
+        
+        <ProductGrid initialProducts={allProducts} />
+        
       </section>
 
       {/* ফ্রি শিপিং ব্যানার */}

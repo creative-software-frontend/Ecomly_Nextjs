@@ -2,7 +2,6 @@
 // GET /api/debug
 
 import { NextResponse } from 'next/server'
-import { getFallbackProducts } from '@/app/lib/fallbackProducts'
 import { getAllSitesProducts } from '@/app/lib/products'
 
 export async function GET() {
@@ -11,29 +10,8 @@ export async function GET() {
     tests: []
   }
   
-  // Test 1: Fallback Products
-  console.log('\n🔍 [DEBUG] Test 1: Checking fallback products...')
-  try {
-    const fallback = getFallbackProducts()
-    debugInfo.tests.push({
-      name: 'Fallback Products',
-      status: '✅ PASS',
-      count: fallback.length,
-      sample: fallback[0]?.name || 'No products'
-    })
-    console.log(`✅ [DEBUG] Fallback: ${fallback.length} products available`)
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    debugInfo.tests.push({
-      name: 'Fallback Products',
-      status: '❌ FAIL',
-      error: errorMessage
-    })
-    console.error('❌ [DEBUG] Fallback test failed:', errorMessage)
-  }
-  
-  // Test 2: Direct API Call (Server-side)
-  console.log('\n🔍 [DEBUG] Test 2: Testing direct API call...')
+  // Test 1: Direct API Call (Server-side)
+  console.log('\n🔍 [DEBUG] Test 1: Testing direct API call...')
   try {
     const apiUrl = 'https://admin.prothomashop.com/api/products'
     const response = await fetch(apiUrl, {
@@ -64,8 +42,8 @@ export async function GET() {
     console.error('❌ [DEBUG] API call failed:', errorMessage)
   }
   
-  // Test 3: getAllSitesProducts Function
-  console.log('\n🔍 [DEBUG] Test 3: Testing getAllSitesProducts...')
+  // Test 2: getAllSitesProducts Function
+  console.log('\n🔍 [DEBUG] Test 2: Testing getAllSitesProducts...')
   try {
     const sitesData = await getAllSitesProducts()
     const totalProducts = sitesData.reduce((sum, site) => sum + site.products.length, 0)
