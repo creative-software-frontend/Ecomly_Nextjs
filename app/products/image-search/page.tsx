@@ -2,7 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import ProductCard from '../components/shared/ProductCard';
+import ProductCard from '../../components/shared/ProductCard';
 import { fakeProducts, FakeProduct } from '@/lib/imageSearchData';
 import { Search, Camera } from 'lucide-react';
 
