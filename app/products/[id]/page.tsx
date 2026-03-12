@@ -82,7 +82,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
               {/* Action Buttons */}
               <div className="flex gap-4">
-                <button className="flex-1 bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition flex items-center justify-center gap-2">
+                <button className="flex-1 bg-primary text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition flex items-center justify-center gap-2">
                   <ShoppingCart size={20} />
                   Add to Cart
                 </button>
