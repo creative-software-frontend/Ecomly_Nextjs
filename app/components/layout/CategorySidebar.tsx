@@ -46,6 +46,10 @@ export default function CategorySidebar() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
+  // Hide sidebar on checkout flow pages
+  const hideSidebarRoutes = ['/cart', '/checkout', '/order-success']
+  if (hideSidebarRoutes.includes(pathname)) return null
+
   // On mobile, show overlay sidebar (controlled by isOpen)
   if (isMobile) {
     if (!isOpen) return null

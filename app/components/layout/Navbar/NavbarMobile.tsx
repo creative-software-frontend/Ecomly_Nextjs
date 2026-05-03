@@ -8,6 +8,7 @@ import LanguageToggle from './LanguageToggle'
 import AuthButton from './AuthButton'
 import CategoryToggleButton from './CategoryToggleButton'
 import Logo from '../../shared/Logo'
+import NotificationDropdown from './NotificationDropdown'
 import { useLanguage } from '@/app/context/LanguageContext'
 import { useCart } from '@/app/context/CartContext'
 
@@ -21,8 +22,9 @@ export default function NavbarMobile() {
       <div className="flex items-center justify-between py-3">
         <Logo showText={false} imageClassName="h-[45px] w-[160px]" />
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2">
           <LanguageToggle />
+          <NotificationDropdown />
           <Link href="/cart" className="relative">
             <ShoppingCart size={22} />
             {totalItems > 0 && (
@@ -31,7 +33,7 @@ export default function NavbarMobile() {
               </span>
             )}
           </Link>
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2">
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>

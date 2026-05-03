@@ -8,6 +8,7 @@ import SearchBar from './SearchBar'
 import { useLanguage} from '@/app/context/LanguageContext'
 import { useCart } from '@/app/context/CartContext'
 import Logo from '../../shared/Logo'
+import NotificationDropdown from './NotificationDropdown'
 
 export default function NavbarDesktop() {
   const { t } = useLanguage()
@@ -24,17 +25,18 @@ export default function NavbarDesktop() {
         </div>
 
         <div className="flex items-center gap-4">
-         <LanguageToggle />
-         <AuthButton />
-         <Link href="/cart" className="relative">
-           <ShoppingCart size={24} className="text-gray-700 hover:text-green-600 transition" />
-           {totalItems > 0 && (
-             <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">
-               {totalItems}
-             </span>
-           )}
-         </Link>
-       </div>
+          <LanguageToggle />
+          <AuthButton />
+          <NotificationDropdown />
+          <Link href="/cart" className="relative">
+            <ShoppingCart size={24} className="text-gray-700 hover:text-green-600 transition" />
+            {totalItems > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">
+                {totalItems}
+              </span>
+            )}
+          </Link>
+        </div>
       </div>
 
       {/* Category Menu */}
