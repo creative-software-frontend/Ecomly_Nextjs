@@ -54,7 +54,7 @@ export default function CartPage() {
   const [newDistrict, setNewDistrict] = useState('')
   const [newThana, setNewThana] = useState('')
   const [newAddress, setNewAddress] = useState('')
-  const [setAsDefault, setSetAsDefault] = useState(false)
+  const [shouldSetDefault, setShouldSetDefault] = useState(false)
 
   const handleAddAddress = (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,17 +66,17 @@ export default function CartPage() {
       district: newDistrict,
       thana: newThana,
       address: newAddress,
-      isDefault: setAsDefault
+      isDefault: shouldSetDefault
     }
     
     let updatedAddresses = [...addresses]
-    if (setAsDefault) {
+    if (shouldSetDefault) {
       updatedAddresses = updatedAddresses.map(a => ({ ...a, isDefault: false }))
     }
     updatedAddresses.push(newAddr)
     
     setAddresses(updatedAddresses)
-    if (setAsDefault) setSelectedAddress(newAddr)
+    if (shouldSetDefault) setSelectedAddress(newAddr)
     setShowAddForm(false)
     
     // Reset form
@@ -86,7 +86,7 @@ export default function CartPage() {
     setNewDistrict('')
     setNewThana('')
     setNewAddress('')
-    setAsDefault(false)
+    setShouldSetDefault(false)
   }
 
   const handlePlaceOrder = () => {
@@ -331,7 +331,7 @@ export default function CartPage() {
                 </div>
 
                 <div className="flex items-center gap-2 py-1">
-                  <input type="checkbox" id="default" checked={setAsDefault} onChange={(e) => setSetAsDefault(e.target.checked)} className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary" />
+                  <input type="checkbox" id="default" checked={shouldSetDefault} onChange={(e) => setShouldSetDefault(e.target.checked)} className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary" />
                   <label htmlFor="default" className="text-xs font-bold text-gray-500 cursor-pointer uppercase tracking-wider">Set as default address</label>
                 </div>
 
