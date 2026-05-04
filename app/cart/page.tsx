@@ -11,8 +11,10 @@ interface Address {
   id: string
   name: string
   phone: string
+  division: string
+  district: string
+  thana: string
   address: string
-  deliveryCharge: number
   isDefault: boolean
 }
 
@@ -21,8 +23,10 @@ const mockAddresses: Address[] = [
     id: '1',
     name: 'John Doe',
     phone: '01712345678',
-    address: '123 Main St, Dhaka, Bangladesh',
-    deliveryCharge: 60,
+    division: 'Dhaka',
+    district: 'Dhaka City',
+    thana: 'Mirpur',
+    address: '123 Main St, Area 4',
     isDefault: true
   }
 ]
@@ -46,18 +50,22 @@ export default function CartPage() {
   // Form State
   const [newName, setNewName] = useState('')
   const [newPhone, setNewPhone] = useState('')
+  const [newDivision, setNewDivision] = useState('')
+  const [newDistrict, setNewDistrict] = useState('')
+  const [newThana, setNewThana] = useState('')
   const [newAddress, setNewAddress] = useState('')
-  const [newDeliveryCharge, setNewDeliveryCharge] = useState('60')
   const [setAsDefault, setSetAsDefault] = useState(false)
 
   const handleAddAddress = (e: React.FormEvent) => {
     e.preventDefault()
     const newAddr: Address = {
       id: Date.now().toString(),
-      name: newName,
-      phone: newPhone,
+      name: newName || 'Unnamed',
+      phone: newPhone || 'No Phone',
+      division: newDivision,
+      district: newDistrict,
+      thana: newThana,
       address: newAddress,
-      deliveryCharge: parseInt(newDeliveryCharge) || 0,
       isDefault: setAsDefault
     }
     
@@ -74,8 +82,10 @@ export default function CartPage() {
     // Reset form
     setNewName('')
     setNewPhone('')
+    setNewDivision('')
+    setNewDistrict('')
+    setNewThana('')
     setNewAddress('')
-    setNewDeliveryCharge('60')
     setAsDefault(false)
   }
 
@@ -84,11 +94,6 @@ export default function CartPage() {
     setOrderId(id)
     setOrderDate(new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }))
     setCurrentView('ORDER_DETAILS')
-    // In a real app, you'd clear the cart here after a delay or on success
-  }
-
-  const handlePrint = () => {
-    window.print()
   }
 
   if (items.length === 0 && currentView === 'CART') {
@@ -113,7 +118,7 @@ export default function CartPage() {
     )
   }
 
-  const deliveryCharge = selectedAddress?.deliveryCharge || 0
+  const deliveryCharge = 60
   const discount = items.length > 2 ? 200 : 0 // Demo discount
   const grandTotal = totalPrice + deliveryCharge - discount
 
@@ -166,8 +171,11 @@ export default function CartPage() {
                     <span className="bg-primary/20 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">{selectedAddress.isDefault ? 'Default' : 'Selected'}</span>
                   </div>
                   <p className="text-sm text-gray-600 mb-1">{selectedAddress.phone}</p>
-                  <p className="text-sm text-gray-500 line-clamp-2">{selectedAddress.address}</p>
-                  <div className="mt-2 text-xs font-bold text-green-600 bg-green-50 inline-block px-2 py-1 rounded">Delivery: ৳{selectedAddress.deliveryCharge}</div>
+                  <p className="text-sm text-gray-500 line-clamp-2">
+                    {selectedAddress.thana}, {selectedAddress.district}, {selectedAddress.division}
+                    <br />
+                    {selectedAddress.address}
+                  </p>
                 </div>
               ) : (
                 <button onClick={() => setShowAddForm(true)} className="w-full py-8 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center gap-2 text-gray-500 hover:border-primary hover:text-primary transition-all">
@@ -179,18 +187,32 @@ export default function CartPage() {
             <div className="bg-white rounded-xl shadow-sm p-6 sticky top-24">
               <h2 className="text-xl font-bold text-gray-900 mb-6">Order Summary</h2>
               <div className="space-y-3 mb-6">
-                <div className="flex justify-between text-gray-600"><span>Subtotal ({items.length} items)</span><span>৳{totalPrice.toLocaleString()}</span></div>
-                <div className="flex justify-between text-gray-600"><span>Delivery Charge</span><span>৳{deliveryCharge.toLocaleString()}</span></div>
-                {discount > 0 && <div className="flex justify-between text-green-600 font-medium"><span>Discount</span><span>-৳{discount.toLocaleString()}</span></div>}
-                <div className="border-t pt-3 flex justify-between font-bold text-lg"><span>Total</span><span className="text-primary">৳{grandTotal.toLocaleString()}</span></div>
+                <div className="flex justify-between text-gray-600 font-medium">
+                  <span>Subtotal ({items.length} items)</span>
+                  <span>৳{totalPrice.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-gray-600 font-medium">
+                  <span>Delivery Charge</span>
+                  <span>৳{deliveryCharge.toLocaleString()}</span>
+                </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-green-600 font-bold bg-green-50 p-2 rounded-lg border border-green-100">
+                    <span>Discount</span>
+                    <span>-৳{discount.toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="border-t-2 border-gray-50 pt-4 flex justify-between font-black text-2xl">
+                  <span>Total</span>
+                  <span className="text-primary">৳{grandTotal.toLocaleString()}</span>
+                </div>
               </div>
               <Link 
                 href="/checkout"
-                className={`w-full bg-primary text-white py-3.5 rounded-xl font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 mb-4 flex items-center justify-center ${!selectedAddress ? 'opacity-50 pointer-events-none' : ''}`}
+                className={`w-full bg-primary text-white py-4 rounded-2xl font-black text-lg hover:bg-primary-dark transition-all shadow-xl shadow-primary/20 mb-4 flex items-center justify-center ${!selectedAddress ? 'opacity-50 pointer-events-none' : ''}`}
               >
                 Proceed to Checkout
               </Link>
-              <button onClick={clearCart} className="w-full text-gray-400 py-2 text-sm font-medium hover:text-red-500 transition-colors">Clear Shopping Cart</button>
+              <button onClick={clearCart} className="w-full text-gray-400 py-2 text-sm font-bold uppercase tracking-widest hover:text-red-500 transition-colors">Clear Shopping Cart</button>
             </div>
           </div>
         </div>
@@ -205,17 +227,17 @@ export default function CartPage() {
         {/* Address List Modal */}
         {showAddressList && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
-              <div className="p-6 border-b flex justify-between items-center">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200">
+              <div className="p-6 border-b flex justify-between items-center flex-shrink-0">
                 <h3 className="text-xl font-bold text-gray-900">Select Address</h3>
-                <button onClick={() => setShowAddressList(false)} className="p-2 hover:bg-gray-100 rounded-full"><X size={20} className="text-gray-400" /></button>
+                <button onClick={() => setShowAddressList(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X size={20} className="text-gray-400" /></button>
               </div>
-              <div className="p-6 max-h-[400px] overflow-y-auto space-y-4">
+              <div className="p-6 overflow-y-auto space-y-4">
                 {addresses.map((addr) => (
                   <div key={addr.id} onClick={() => { setSelectedAddress(addr); setShowAddressList(false); }} className={`p-4 border-2 rounded-2xl cursor-pointer transition-all ${selectedAddress?.id === addr.id ? 'border-primary bg-primary/5' : 'border-gray-100 hover:border-primary/30'}`}>
                     <div className="flex justify-between items-center mb-2"><span className="font-bold text-gray-900">{addr.name}</span>{selectedAddress?.id === addr.id && <Check size={18} className="text-primary" />}</div>
                     <p className="text-sm text-gray-600">{addr.phone}</p>
-                    <p className="text-sm text-gray-500 mt-1">{addr.address}</p>
+                    <p className="text-sm text-gray-500 mt-1">{addr.thana}, {addr.district}, {addr.division}</p>
                   </div>
                 ))}
                 <button onClick={() => { setShowAddressList(false); setShowAddForm(true); }} className="w-full py-4 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center gap-2 text-primary font-bold hover:bg-primary/5 transition-all">
@@ -229,18 +251,94 @@ export default function CartPage() {
         {/* Add Address Form Modal */}
         {showAddForm && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
-              <div className="p-6 border-b flex justify-between items-center">
-                <h3 className="text-xl font-bold text-gray-900">Add New Address</h3>
-                <button onClick={() => setShowAddForm(false)} className="p-2 hover:bg-gray-100 rounded-full"><X size={20} className="text-gray-400" /></button>
+            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200">
+              <div className="p-6 border-b flex justify-between items-center bg-gray-50 flex-shrink-0">
+                <h3 className="text-xl font-bold text-gray-900">Shipping Details</h3>
+                <button onClick={() => setShowAddForm(false)} className="p-2 hover:bg-gray-200 rounded-full transition-colors"><X size={20} className="text-gray-400" /></button>
               </div>
-              <form onSubmit={handleAddAddress} className="p-6 space-y-4">
-                <div className="space-y-2"><label className="text-sm font-semibold text-gray-700">Full Name</label><input type="text" required value={newName} onChange={(e) => setNewName(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" placeholder="John Doe" /></div>
-                <div className="space-y-2"><label className="text-sm font-semibold text-gray-700">Phone Number</label><input type="tel" required value={newPhone} onChange={(e) => setNewPhone(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" placeholder="01XXXXXXXXX" /></div>
-                <div className="space-y-2"><label className="text-sm font-semibold text-gray-700">Full Address</label><textarea required rows={3} value={newAddress} onChange={(e) => setNewAddress(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none" placeholder="Street address, city, area" /></div>
-                <div className="space-y-2"><label className="text-sm font-semibold text-gray-700">Delivery Charge (৳)</label><input type="number" required value={newDeliveryCharge} onChange={(e) => setNewDeliveryCharge(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" placeholder="60" /></div>
-                <div className="flex items-center gap-2 py-2"><input type="checkbox" id="default" checked={setAsDefault} onChange={(e) => setSetAsDefault(e.target.checked)} className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary" /><label htmlFor="default" className="text-sm font-medium text-gray-600 cursor-pointer">Set as default address</label></div>
-                <div className="flex gap-3 pt-2"><button type="button" onClick={() => setShowAddForm(false)} className="flex-1 py-3.5 border border-gray-200 rounded-xl font-bold text-gray-500 hover:bg-gray-50 transition-all">Cancel</button><button type="submit" className="flex-1 bg-primary text-white py-3.5 rounded-xl font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20">Save Address</button></div>
+              <form onSubmit={handleAddAddress} className="p-6 space-y-5 overflow-y-auto">
+                {/* User Info (Hidden in screenshot but needed for functional address) */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Name *</label>
+                    <input type="text" required value={newName} onChange={(e) => setNewName(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium" placeholder="Recipient Name" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Phone *</label>
+                    <input type="tel" required value={newPhone} onChange={(e) => setNewPhone(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium" placeholder="01XXXXXXXXX" />
+                  </div>
+                </div>
+
+                {/* Division */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Division *</label>
+                  <select 
+                    required 
+                    value={newDivision} 
+                    onChange={(e) => setNewDivision(e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium appearance-none"
+                  >
+                    <option value="">Select Division</option>
+                    {['Dhaka', 'Chattogram', 'Rajshahi', 'Khulna', 'Barishal', 'Sylhet', 'Rangpur', 'Mymensingh'].map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* District */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">District *</label>
+                  <select 
+                    required 
+                    value={newDistrict} 
+                    onChange={(e) => setNewDistrict(e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium appearance-none"
+                  >
+                    <option value="">Select District</option>
+                    {['Dhaka City', 'Gazipur', 'Narayanganj', 'Tangail'].map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Thana */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Thana *</label>
+                  <select 
+                    required 
+                    value={newThana} 
+                    onChange={(e) => setNewThana(e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium appearance-none"
+                  >
+                    <option value="">Select Thana</option>
+                    {['Mirpur', 'Uttara', 'Gulshan', 'Dhanmondi'].map(t => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Detailed Address */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Address Details *</label>
+                  <textarea 
+                    required 
+                    rows={3} 
+                    value={newAddress} 
+                    onChange={(e) => setNewAddress(e.target.value)} 
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none text-sm font-medium" 
+                    placeholder="Details..." 
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 py-1">
+                  <input type="checkbox" id="default" checked={setAsDefault} onChange={(e) => setSetAsDefault(e.target.checked)} className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary" />
+                  <label htmlFor="default" className="text-xs font-bold text-gray-500 cursor-pointer uppercase tracking-wider">Set as default address</label>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button type="button" onClick={() => setShowAddForm(false)} className="flex-1 py-4 border border-gray-200 rounded-2xl font-black text-xs uppercase tracking-widest text-gray-400 hover:bg-gray-50 transition-all">Cancel</button>
+                  <button type="submit" className="flex-1 bg-primary text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-primary-dark transition-all shadow-xl shadow-primary/20">Save Details</button>
+                </div>
               </form>
             </div>
           </div>

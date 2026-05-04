@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { X, Mail, Smartphone, Lock, Eye, EyeOff, ArrowLeft, CheckCircle2, User, ChevronRight } from 'lucide-react'
+import { useAuth } from '@/app/context/AuthContext'
 
 interface LoginModalProps {
   isOpen: boolean
@@ -12,6 +13,7 @@ type AuthView = 'LOGIN' | 'REGISTER' | 'FORGOT_PASSWORD' | 'OTP' | 'RESET_PASSWO
 type AuthMethod = 'MOBILE' | 'EMAIL'
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
+  const { login } = useAuth()
   const [view, setView] = useState<AuthView>('LOGIN')
   const [authMethod, setAuthMethod] = useState<AuthMethod>('MOBILE')
   const [showPassword, setShowPassword] = useState(false)
@@ -63,6 +65,14 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setTimeout(() => {
       setLoading(false)
       if (view === 'LOGIN' || view === 'REGISTER') {
+        // Simulate real user data
+        login({
+          id: '1',
+          name: name || 'Demo User',
+          email: email || 'user@example.com',
+          phone: mobileNumber || '01234567890',
+          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'
+        })
         onClose()
       } else if (view === 'FORGOT_PASSWORD') {
         setView('OTP')

@@ -13,7 +13,7 @@ interface SiteConfig {
 }
 
 const SITES: SiteConfig[] = [
-  { 
+  {
     id: 'prothomashop',
     name: 'প্রথম আলো শপ',
     apiUrl: 'https://admin.prothomashop.com/api/products',
@@ -30,12 +30,12 @@ async function safeJsonParse(response: Response): Promise<any> {
   try {
     const text = await response.text()
     console.log('Response text (first 100 chars):', text.substring(0, 100))
-    
+
     if (!text || text.includes('Not found') || text.includes('not found')) {
       console.warn('API returned "Not found" or empty response')
       return null
     }
-    
+
     return JSON.parse(text)
   } catch (error) {
     console.error('JSON parse error:', error instanceof Error ? error.message : error)
@@ -48,28 +48,28 @@ async function safeJsonParse(response: Response): Promise<any> {
 // ============================================
 
 function formatProthomashopProduct(product: ProthomashopProduct, baseUrl?: string): Product {
-  const cleanDescription = product.short_description 
+  const cleanDescription = product.short_description
     ? product.short_description.replace(/<[^>]*>/g, '').trim()
     : ''
-  
+
   // Use environment variable for image base URL
-  const imageUrl = product.image 
+  const imageUrl = product.image
     ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://admin.prothomashop.com/product/'}${product.image}`
     : '/placeholder.jpg';
-  
+
   console.log(`Product: ${product.title}, Image: ${product.image}, Full URL: ${imageUrl}`);
-  
- return {
-   id: product.id.toString(),
+
+  return {
+    id: product.id.toString(),
     name: product.title,
     price: product.sale_price || product.price,
     oldPrice: product.price > product.sale_price ? product.price : undefined,
-   image: imageUrl,
-   rating: {
-     stars: 4.5,
-     count: product.total_orders || 0
+    image: imageUrl,
+    rating: {
+      stars: 4.5,
+      count: product.total_orders || 0
     },
-   category: product.category || 'Book',
+    category: product.category || 'Book',
     description: cleanDescription,
     sku: product.sku,
     shipping_cost: product.shipping_cost,
@@ -87,26 +87,26 @@ async function fetchSingleSite(site: SiteConfig): Promise<SiteProducts> {
   try {
     console.log(`\nFetching data from ${site.name}...`)
     console.log(`API URL: ${site.apiUrl}`)
-    
+
     const response = await fetch(site.apiUrl, {
       next: { revalidate: 3600 }
     })
-    
+
     console.log(`Response Status: ${response.status}`)
     console.log(`Content-Type: ${response.headers.get('content-type')}`)
-    
+
     if (!response.ok) {
       console.warn(`${site.name} - HTTP error! Status: ${response.status}`)
       const errorText = await response.text()
       console.warn(`Error response:`, errorText.substring(0, 200))
       throw new Error(`HTTP ${response.status}`)
     }
-    
+
     const data: GenericApiResponse = await safeJsonParse(response)
-    
+
     if (!data) {
       console.warn(`${site.name}: No valid data received`)
-      
+
       return {
         id: site.id,
         site: site.name,
@@ -115,9 +115,9 @@ async function fetchSingleSite(site: SiteConfig): Promise<SiteProducts> {
         error: 'API returned invalid response'
       }
     }
-    
+
     let products: Product[] = []
-    
+
     // ===== নতুন CASE যোগ করা হলো =====
     // CASE: Paginated API format (current_page, data array)
     if (data.current_page && Array.isArray(data.data)) {
@@ -141,54 +141,54 @@ async function fetchSingleSite(site: SiteConfig): Promise<SiteProducts> {
     // CASE 1: Prothomashop data format
     else if (site.id === 'prothomashop' && data.success && data.result?.products) {
       console.log(`${site.name}: Detected Prothomashop format with ${data.result.products.length} products`)
-      products = data.result.products.map((product: any) => 
+      products = data.result.products.map((product: any) =>
         formatProthomashopProduct(product as ProthomashopProduct, site.imageUrl)
       )
-    } 
+    }
     // CASE 2: Direct array format
     else if (Array.isArray(data)) {
       console.log(`${site.name}: Detected direct array format with ${data.length} products`)
       products = data as Product[]
-    } 
+    }
     // CASE 3: Data inside 'products' property
     else if (data.products) {
-    console.log(`${site.name}: Detected products property format`)
+      console.log(`${site.name}: Detected products property format`)
       products = data.products.map((p: any) => ({
         id: p.id.toString(),
         name: p.name || p.title || 'Unknown Product',
         price: p.sale_price || p.price,
         oldPrice: p.sale_price && p.sale_price < p.price ? p.price : undefined,
-      image: p.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://admin.prothomashop.com/product/'}${p.image}` : '/placeholder.jpg',
-      rating: {
-        stars: p.rating || 0,
-        count: p.reviews || 0
+        image: p.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://admin.prothomashop.com/product/'}${p.image}` : '/placeholder.jpg',
+        rating: {
+          stars: p.rating || 0,
+          count: p.reviews || 0
         }
       }))
-    } 
+    }
     // CASE 4: Data inside 'result.products'
     else if (data.result?.products) {
-     console.log(`${site.name}: Detected result.products format with ${data.result.products.length} products`)
+      console.log(`${site.name}: Detected result.products format with ${data.result.products.length} products`)
       products = data.result.products.map((p: any) => ({
         id: p.id.toString(),
         name: p.name || p.title || 'Unknown Product',
         price: p.sale_price || p.price,
         oldPrice: p.sale_price && p.sale_price < p.price ? p.price : undefined,
-       image: p.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://admin.prothomashop.com/product/'}${p.image}` : '/placeholder.jpg',
-       rating: {
-         stars: p.rating || 0,
-         count: p.reviews || p.total_orders || 0
+        image: p.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://admin.prothomashop.com/product/'}${p.image}` : '/placeholder.jpg',
+        rating: {
+          stars: p.rating || 0,
+          count: p.reviews || p.total_orders || 0
         }
       }))
     }
     else {
       console.warn(`${site.name}: Unknown data format`, Object.keys(data))
     }
-    
+
     console.log(`${site.name}: Processed ${products.length} products`)
-    
+
     if (products.length === 0) {
       console.warn(`${site.name}: API returned 0 products`)
-      
+
       return {
         id: site.id,
         site: site.name,
@@ -197,20 +197,20 @@ async function fetchSingleSite(site: SiteConfig): Promise<SiteProducts> {
         error: 'API returned empty products array'
       }
     }
-    
+
     console.log(`${site.name}: Successfully loaded ${products.length} products`)
-    
+
     return {
       id: site.id,
       site: site.name,
       products: products,
       success: true
     }
-    
+
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     console.error(`${site.name} data fetch failed:`, errorMessage)
-    
+
     return {
       id: site.id,
       site: site.name,
@@ -229,19 +229,19 @@ export async function getAllSitesProducts(): Promise<SiteProducts[]> {
   try {
     console.log('Starting data fetch from all sites...')
     console.log(`Total sites configured: ${SITES.length}`)
-    
+
     const promises = SITES.map(site => fetchSingleSite(site))
     const results = await Promise.all(promises)
-    
+
     const successfulSites = results.filter((r: SiteProducts) => r.success).length
     const totalProducts = results.reduce((sum: number, r: SiteProducts) => sum + r.products.length, 0)
-    
+
     const failedSites = results.filter(r => !r.success).length
-    
+
     console.log(`\n=== Data Load Summary ===`)
     console.log(`${successfulSites}/${SITES.length} sites succeeded`)
     console.log(`Total products: ${totalProducts}`)
-    
+
     if (failedSites > 0) {
       console.log(`${failedSites} site(s) failed to load`)
       results.forEach(r => {
@@ -252,14 +252,14 @@ export async function getAllSitesProducts(): Promise<SiteProducts[]> {
     } else {
       console.log('All sites loaded successfully with real API data')
     }
-    
+
     console.log(`=========================\n`)
-    
+
     return results
-    
+
   } catch (error) {
     console.error('Major error! Failed to fetch products', error)
-    
+
     return []
   }
 }
@@ -271,23 +271,23 @@ export async function getAllSitesProducts(): Promise<SiteProducts[]> {
 export async function getCategoryProducts(categoryId: number): Promise<Product[]> {
   try {
     console.log(`Fetching category ${categoryId} products...`)
-    
+
     const url = `https://admin.prothomashop.com/api/category/${categoryId}/products`
     console.log('URL:', url)
-    
+
     const response = await fetch(url, {
       next: { revalidate: 60 }
     })
-    
+
     console.log('Response status:', response.status)
-    
+
     if (!response.ok) {
       console.warn('Category API response not OK')
       return []
     }
-    
+
     const data = await response.json()
-    
+
     if (data.success && data.result?.products) {
       console.log(`Found ${data.result.products.length} products`)
       return data.result.products.map((p: any) => ({
@@ -301,9 +301,9 @@ export async function getCategoryProducts(categoryId: number): Promise<Product[]
         description: p.short_description?.replace(/<[^>]*>/g, '') || ''
       }))
     }
-    
+
     return []
-    
+
   } catch (error) {
     console.error('Error fetching category products:', error)
     return []
@@ -328,3 +328,49 @@ export async function getAllProducts(): Promise<Product[]> {
   const sitesData = await getAllSitesProducts()
   return sitesData.flatMap(site => site.products)
 }
+
+// ============================================
+// STEP 9: Category type and fetcher
+// ============================================
+
+export interface Category {
+  id: number
+  name: string
+  image?: string
+  product_count?: number
+}
+
+export async function getCategories(): Promise<Category[]> {
+  try {
+    const response = await fetch('https://admin.prothomashop.com/api/categories', {
+      next: { revalidate: 3600 }
+    })
+
+    if (!response.ok) {
+      console.warn('Categories API not available, status:', response.status)
+      return []
+    }
+
+    const data = await safeJsonParse(response)
+    if (!data) return []
+
+    const mapCat = (c: any): Category => ({
+      id: c.id,
+      name: c.name || c.title || 'Unknown',
+      image: c.image,
+      product_count: c.product_count ?? c.products_count
+    })
+
+    if (data.current_page && Array.isArray(data.data)) return data.data.map(mapCat)
+    if (data.success && Array.isArray(data.result?.categories)) return data.result.categories.map(mapCat)
+    if (data.success && Array.isArray(data.result)) return data.result.map(mapCat)
+    if (Array.isArray(data)) return data.map(mapCat)
+    if (Array.isArray(data.data)) return data.data.map(mapCat)
+
+    console.warn('Unknown categories API format:', Object.keys(data))
+    return []
+  } catch (error) {
+    console.error('Error fetching categories:', error)
+    return []
+  }
+}

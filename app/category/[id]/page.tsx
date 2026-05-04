@@ -12,10 +12,10 @@ interface CategoryPageProps {
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const resolvedParams = await params
   const categoryId = parseInt(resolvedParams.id)
-  
+
   // Fetch products for this category
   const products = await getCategoryProducts(categoryId)
-  
+
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4 py-8">
@@ -31,7 +31,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           <ChevronRight size={16} />
           <span className="text-gray-900 font-medium">Category #{categoryId}</span>
         </div>
-        
+
         {/* Header */}
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           Category Products
@@ -39,7 +39,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         <p className="text-gray-600 mb-8">
           Showing {products.length} {products.length === 1 ? 'product' : 'products'}
         </p>
-        
+
         {/* Products Grid */}
         {products.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">

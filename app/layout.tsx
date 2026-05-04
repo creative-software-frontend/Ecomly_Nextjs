@@ -5,6 +5,7 @@ import CategorySidebarWrapper from './components/layout/CategorySidebarWrapper'
 import { LanguageProvider } from './context/LanguageContext'
 import { CategorySidebarProvider } from '@/app/context/CategorySidebarContext'
 import { CartProvider } from '@/app/context/CartContext'
+import { AuthProvider } from '@/app/context/AuthContext'
 import './globals.css'
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -21,14 +22,16 @@ export default function RootLayout({
     <html lang="en" className={cn("font-sans", geist.variable)}>
       <body>
         <LanguageProvider>
-          <CartProvider>
-            <CategorySidebarProvider>
-              <Navbar />
-              <main className="min-h-screen lg:ml-72">{children}</main>
-              <CategorySidebarWrapper />
-              <Footer />
-            </CategorySidebarProvider>
-          </CartProvider>
+          <AuthProvider>
+            <CartProvider>
+              <CategorySidebarProvider>
+                <Navbar />
+                <main className="min-h-screen lg:ml-72">{children}</main>
+                <CategorySidebarWrapper />
+                <Footer />
+              </CategorySidebarProvider>
+            </CartProvider>
+          </AuthProvider>
         </LanguageProvider>
       </body>
     </html>

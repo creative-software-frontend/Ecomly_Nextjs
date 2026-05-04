@@ -1,70 +1,66 @@
-import { getAllSitesProducts } from '../lib/products'
-import ProductCard from '../components/shared/ProductCard'
 import Link from 'next/link'
-import { ChevronRight } from 'lucide-react'
+import {
+  ShoppingBag, Gem, Footprints, Sparkles, Shirt,
+  Glasses, Baby, Watch, Smartphone
+} from 'lucide-react'
 
-export default async function CategoriesPage() {
-  const sitesData = await getAllSitesProducts()
-  const allProducts = sitesData.flatMap(site => site.products)
-  const featuredProducts = allProducts.slice(0, 12)
+export const metadata = {
+  title: 'Categories | Ecomly',
+  description: 'Browse all product categories on Ecomly.',
+}
 
+const categories = [
+  { id: 'bags',        name: 'Bags',        icon: ShoppingBag },
+  { id: 'jewelry',     name: 'Jewelry',     icon: Gem         },
+  { id: 'shoes',       name: 'Shoes',       icon: Footprints  },
+  { id: 'beauty',      name: 'Beauty',      icon: Sparkles    },
+  { id: 'mens-wear',   name: 'Mens Wear',   icon: Shirt       },
+  { id: 'women-wear',  name: 'Women Wear',  icon: Shirt       },
+  { id: 'eyewear',     name: 'Eyewear',     icon: Glasses     },
+  { id: 'baby-items',  name: 'Baby Items',  icon: Baby        },
+  { id: 'watches',     name: 'Watches',     icon: Watch       },
+  { id: 'gadgets',     name: 'Gadgets',     icon: Smartphone  },
+]
+
+export default function CategoriesPage() {
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
-          <Link href="/" className="hover:text-primary">
-            Home
-          </Link>
-          <ChevronRight size={16} />
-          <span className="text-gray-900 font-medium">All Categories</span>
-        </div>
-        
+    <div className="bg-white min-h-screen">
+      <div className="container mx-auto px-4 py-10">
+
         {/* Header */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          All Categories
-        </h1>
-        <p className="text-gray-600 mb-8">
-          Browse through our complete collection of products
+        <h1 className="text-3xl font-bold text-green-600 mb-1">Categories</h1>
+        <p className="text-gray-500 text-sm mb-8">
+          Find the perfect product for your needs
         </p>
-        
-        {/* Products Grid */}
-        {featuredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {featuredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                id={product.id}
-                name={product.name}
-                price={product.price}
-                oldPrice={product.oldPrice}
-                image={product.image}
-                rating={product.rating.stars}
-                reviewCount={product.rating.count}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16 bg-white rounded-lg shadow-sm">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-gray-100 rounded-full mb-4">
-              <svg
-                className="w-12 h-12 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+
+        {/* Category icon cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+          {categories.map(cat => {
+            const Icon = cat.icon
+            return (
+              <Link
+                key={cat.id}
+                href={`/categories/${cat.id}`}
+                className="group flex flex-col items-center py-7 px-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-green-200 hover:bg-green-50 transition-all duration-200 shadow-sm hover:shadow-md"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                />
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
-            <p className="text-gray-600">We couldn&apos;t find any products at the moment. Please check back later.</p>
-          </div>
-        )}
+                {/* Icon circle */}
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 group-hover:shadow-md group-hover:bg-green-100 transition-all duration-200">
+                  <Icon
+                    size={36}
+                    strokeWidth={1.4}
+                    className="text-gray-500 group-hover:text-green-600 transition-colors duration-200"
+                  />
+                </div>
+
+                {/* Category name */}
+                <span className="text-xs font-bold uppercase tracking-widest text-gray-500 group-hover:text-green-600 text-center transition-colors duration-200">
+                  {cat.name}
+                </span>
+              </Link>
+            )
+          })}
+        </div>
+
       </div>
     </div>
   )

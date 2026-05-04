@@ -46,12 +46,12 @@ export default function ProductCard({
 
   return (
     <div 
-      className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden"
+      className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden flex flex-col h-full"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image Section */}
-      <div className="relative h-64 w-full overflow-hidden bg-gray-100">
+      <div className="relative h-64 w-full overflow-hidden bg-gray-100 flex-shrink-0">
         <Image
           src={imageError ? '/placeholder.jpg' : image}
           alt={name}
@@ -97,40 +97,42 @@ export default function ProductCard({
       </div>
 
       {/* Content Section */}
-      <div className="p-4">
-        {/* Rating */}
-        <div className="flex items-center gap-2 mb-2">
-          <div className="flex items-center">
-            {[...Array(5)].map((_, i) => (
-              <Star 
-                key={i} 
-                size={16} 
-                className={i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
-              />
-            ))}
+      <div className="p-4 flex flex-col flex-1">
+        <div className="flex-1">
+          {/* Rating */}
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center">
+              {[...Array(5)].map((_, i) => (
+                <Star 
+                  key={i} 
+                  size={16} 
+                  className={i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                />
+              ))}
+            </div>
+            <span className="text-sm text-gray-500">({reviewCount})</span>
           </div>
-          <span className="text-sm text-gray-500">({reviewCount})</span>
-        </div>
 
-        {/* Product Name */}
-        <Link href={`/products/${id}`}>
-          <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2 hover:text-primary transition-colors">
-            {name}
-          </h3>
-        </Link>
+          {/* Product Name */}
+          <Link href={`/products/${id}`}>
+            <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2 hover:text-primary transition-colors min-h-[40px]">
+              {name}
+            </h3>
+          </Link>
 
-        {/* Price */}
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-xl font-bold text-gray-900">৳{price.toLocaleString()}</span>
-          {oldPrice && (
-            <span className="text-sm text-gray-400 line-through">৳{oldPrice.toLocaleString()}</span>
-          )}
+          {/* Price */}
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-xl font-bold text-gray-900">৳{price.toLocaleString()}</span>
+            {oldPrice && (
+              <span className="text-sm text-gray-400 line-through">৳{oldPrice.toLocaleString()}</span>
+            )}
+          </div>
         </div>
 
         {/* Add to Cart Button */}
         <button 
           onClick={handleAddToCart}
-          className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+          className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-green-600 transition-colors flex items-center justify-center gap-2 mt-auto"
         >
           <ShoppingCart size={18} />
           {t('products.addToCart')}

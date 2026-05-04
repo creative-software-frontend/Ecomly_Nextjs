@@ -11,7 +11,7 @@ export default function FooterHelp() {
       <h3 className="font-semibold text-lg mb-4 text-gray-900">HELP</h3>
       <ul className="space-y-2">
         <li>
-          <Link href="/contact" className="text-gray-500 hover:text-green-600 transition-colors">
+          <Link href="/contact-us" className="text-gray-500 hover:text-green-600 transition-colors">
             {t('footer.contact')}
           </Link>
         </li>
@@ -26,12 +26,12 @@ export default function FooterHelp() {
           </Link>
         </li>
         <li>
-          <Link href="/sell" className="text-gray-500 hover:text-green-600 transition-colors">
+          <Link href="/sell-on-ecomly" className="text-gray-500 hover:text-green-600 transition-colors">
             {t('footer.sell')}
           </Link>
         </li>
         <li>
-          <Link href="/university" className="text-gray-500 hover:text-green-600 transition-colors">
+          <Link href="/ecomly-university" className="text-gray-500 hover:text-green-600 transition-colors">
             {t('footer.university')}
           </Link>
         </li>
